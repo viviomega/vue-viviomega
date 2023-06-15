@@ -20,6 +20,8 @@
 </template>
 
 <script>
+import { firebaseApp } from "./firebase";
+
 export default {
   name: "App",
 
