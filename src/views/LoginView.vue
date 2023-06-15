@@ -24,7 +24,12 @@
         </v-card-actions>
       </v-card>
     </div>
-    <div v-else>個人情報登録画面</div>
+    <div v-else>
+      個人情報登録画面
+      <v-btn variant="tonal" color="primary" block @click="signout">
+        サインアウト
+      </v-btn>
+    </div>
   </v-container>
 </template>
 
@@ -104,6 +109,18 @@ export default defineComponent({
           const errorCode = error.code;
           const errorMessage = error.message;
           console.log(errorCode, errorMessage);
+        });
+    },
+
+    // TODO:仮設置
+    signout() {
+      const auth = getAuth();
+      signOut(auth)
+        .then(() => {
+          this.currentUser = null;
+        })
+        .catch((error) => {
+          console.log(error);
         });
     },
   },
