@@ -33,8 +33,8 @@
   </v-container>
 </template>
 
-<script>
-import { defineComponent } from "vue";
+<script setup>
+import { ref, onMounted } from "vue";
 // Authentication実行に必要なパッケージ
 import {
   getAuth,
@@ -43,86 +43,79 @@ import {
   signInWithEmailAndPassword,
   createUserWithEmailAndPassword,
 } from "firebase/auth";
-// Components
-export default defineComponent({
-  name: "LoginView",
-  data: () => ({
-    //パスワードのブラインド切り替え用の値
-    show: false,
 
-    // 定数
-    constant: {
-      email: "メールアドレス",
-      password: "パスワード",
-      signin: "サインイン",
-      sinup: "サインアップ",
-    },
+//パスワードのブラインド切り替え用の値
+const show = ref(false);
 
-    // サインイン/サインアップデータ
-    email: "",
-    password: "",
+// 定数
+const constant = {
+  email: "メールアドレス",
+  password: "パスワード",
+  signin: "サインイン",
+  sinup: "サインアップ",
+};
 
-    // ログインしているユーザーデータ
-    currentUser: "",
-  }),
-  mounted() {
-    const auth = getAuth();
-    // ログインしているユーザーを取得する
-    onAuthStateChanged(auth, (user) => {
-      if (user != null) {
-        this.currentUser = user;
-      } else {
-        this.currentUser = null;
-      }
-    });
-  },
-  methods: {
-    // サインイン処理
-    signin() {
-      // メールアドレスとパスワードが入力されているかを確認
-      if (this.email == "" || this.email == "") return;
-      const auth = getAuth();
-      signInWithEmailAndPassword(auth, this.email, this.password)
-        .then((userCredential) => {
-          // 成功時処理
-          const user = userCredential.user;
-          console.log(user);
-        })
-        .catch((error) => {
-          // 失敗時処理
-          const errorCode = error.code;
-          const errorMessage = error.message;
-          console.log(errorCode, errorMessage);
-        });
-    },
-    // サインアップ処理
-    createAccount() {
-      const auth = getAuth();
-      createUserWithEmailAndPassword(auth, this.email, this.password)
-        .then((userCredential) => {
-          // 成功時処理
-          const user = userCredential.user;
-          console.log(user);
-        })
-        .catch((error) => {
-          // 失敗時処理
-          const errorCode = error.code;
-          const errorMessage = error.message;
-          console.log(errorCode, errorMessage);
-        });
-    },
+// サインイン/サインアップデータ
+const email = ref("");
+const password = ref("");
 
-    // TODO:仮設置
-    signout() {
-      const auth = getAuth();
-      signOut(auth)
-        .then(() => {
-          this.currentUser = null;
-        })
-        .catch((error) => {
-          console.log(error);
-        });
-    },
-  },
+// ログインしているユーザーデータ
+const currentUser = ref(null);
+
+// ライフサイクルmounted
+onMounted(() => {
+  const auth = getAuth();
+  onAuthStateChanged(auth, (user) => {
+    if (user != null) currentUser.value = user;
+    else currentUser.value = null;
+  });
 });
+
+// サインイン処理
+const signin = () => {
+  // メールアドレスとパスワードが入力されているかを確認
+  if (email.value == "" || password.value == "") return;
+  const auth = getAuth();
+  signInWithEmailAndPassword(auth, email.value, password.value)
+    .then((userCredential) => {
+      // 成功時処理
+      const user = userCredential.user;
+      console.log(user);
+    })
+    .catch((error) => {
+      // 失敗時処理
+      const errorCode = error.code;
+      const errorMessage = error.message;
+      console.log(errorCode, errorMessage);
+    });
+};
+
+// サインアップ処理
+const createAccount = () => {
+  const auth = getAuth();
+  createUserWithEmailAndPassword(auth, email.value, password.value)
+    .then((userCredential) => {
+      // 成功時処理
+      const user = userCredential.user;
+      console.log(user);
+    })
+    .catch((error) => {
+      // 失敗時処理
+      const errorCode = error.code;
+      const errorMessage = error.message;
+      console.log(errorCode, errorMessage);
+    });
+};
+
+// TODO:仮設置
+const signout = () => {
+  const auth = getAuth();
+  signOut(auth)
+    .then(() => {
+      currentUser.value = null;
+    })
+    .catch((error) => {
+      console.log(error);
+    });
+};
 </script>
