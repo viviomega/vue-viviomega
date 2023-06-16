@@ -19,25 +19,22 @@
   </v-app>
 </template>
 
-<script>
+<script setup>
 import { firebaseApp } from "./firebase";
 
-export default {
-  name: "App",
+//サイトのタイトル
+const title = "びびおめがサイト";
 
-  data: () => ({
-    title: "びびおめがサイト", //サイトのタイトル
-    // HOMEアイコン
-    home: {
-      icon: "mdi-home",
-      link: "", //今回は設定しない
-    },
-    // コピーライトp
-    copyright: {
-      icon: "©",
-      date: "2023",
-      name: "ViviOmega",
-    },
-  }),
+// HOMEアイコン
+const home = {
+  icon: "mdi-home",
+  link: "", //今回は設定しない
+};
+
+// コピーライト
+const copyright = {
+  icon: "©",
+  date: "2023",
+  name: "ViviOmega",
 };
 </script>
