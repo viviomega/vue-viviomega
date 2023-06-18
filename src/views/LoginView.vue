@@ -4,6 +4,13 @@
       <v-card max-width="500" class="mx-auto">
         <v-card-actions>
           <v-row>
+            <v-col cols="12" v-if="serverError.text">
+              <v-alert
+                type="error"
+                :title="serverError.title"
+                :text="serverError.text"
+              ></v-alert>
+            </v-col>
             <v-col cols="12">
               <v-text-field
                 v-model="state.email"
@@ -103,7 +110,11 @@ onMounted(() => {
   });
 });
 
-const errormessage = ref(null);
+// サーバーエラーメッセージ
+const serverError = reactive({
+  title: "認証エラー",
+  text: "",
+});
 
 // サインイン処理
 const signin = async () => {
@@ -125,6 +136,11 @@ const signin = async () => {
       const errorCode = error.code;
       const errorMessage = error.message;
       console.log(errorCode, errorMessage);
+      if (errorCode === "auth/user-not-found") {
+        serverError.text = "登録されていないメールアドレストです";
+      } else if (errorCode === "auth/wrong-password") {
+        serverError.text = "パスワードが違います";
+      }
     });
 };
 
@@ -146,6 +162,10 @@ const createAccount = async () => {
       const errorCode = error.code;
       const errorMessage = error.message;
       console.log(errorCode, errorMessage);
+
+      if (errorCode === "auth/email-already-in-use") {
+        serverError.text = "既に登録されているメールアドレスです";
+      }
     });
 };
 
