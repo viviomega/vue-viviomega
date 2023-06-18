@@ -3,24 +3,40 @@
     <div v-if="currentUser == null">
       <v-card max-width="500" class="mx-auto">
         <v-card-actions>
-          <v-col>
-            <v-text-field v-model="email" :label="constant.email" type="email">
-            </v-text-field>
-            <v-text-field
-              v-model="password"
-              :label="constant.password"
-              :type="show ? 'text' : 'password'"
-              :append-inner-icon="show ? 'mdi-eye' : 'mdi-eye-off'"
-              @click:append-inner="show = !show"
-            >
-            </v-text-field>
-            <v-btn color="primary" variant="tonal" @click="signin">
-              {{ constant.signin }}
-            </v-btn>
-            <v-btn color="primary" variant="tonal" @click="createAccount">
-              {{ constant.sinup }}
-            </v-btn>
-          </v-col>
+          <v-row>
+            <v-col cols="12">
+              <v-text-field
+                v-model="state.email"
+                :error-messages="v$.email.$errors.map((e) => e.$message)"
+                :label="constant.email"
+                type="email"
+                @input="v$.email.$touch"
+                @blur="v$.email.$touch"
+              >
+              </v-text-field>
+            </v-col>
+            <v-col cols="12">
+              <v-text-field
+                v-model="state.password"
+                :label="constant.password"
+                :type="show ? 'text' : 'password'"
+                :append-inner-icon="show ? 'mdi-eye' : 'mdi-eye-off'"
+                @click:append-inner="show = !show"
+                :error-messages="v$.password.$errors.map((e) => e.$message)"
+                @input="v$.password.$touch"
+                @blur="v$.password.$touch"
+              >
+              </v-text-field>
+            </v-col>
+            <v-col cols="12">
+              <v-btn color="primary" variant="tonal" @click="signin">
+                {{ constant.signin }}
+              </v-btn>
+              <v-btn color="primary" variant="tonal" @click="createAccount">
+                {{ constant.sinup }}
+              </v-btn>
+            </v-col>
+          </v-row>
         </v-card-actions>
       </v-card>
     </div>
@@ -34,7 +50,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from "vue";
+import { ref, reactive, onMounted } from "vue";
 // Authentication実行に必要なパッケージ
 import {
   getAuth,
@@ -43,6 +59,11 @@ import {
   signInWithEmailAndPassword,
   createUserWithEmailAndPassword,
 } from "firebase/auth";
+
+// Vuelidateパッケージ
+import { useVuelidate } from "@vuelidate/core";
+// Builtin
+import { email, required, minLength } from "@vuelidate/validators";
 
 //パスワードのブラインド切り替え用の値
 const show = ref(false);
@@ -56,8 +77,19 @@ const constant = {
 };
 
 // サインイン/サインアップデータ
-const email = ref("");
-const password = ref("");
+const state = reactive({
+  email: "",
+  password: "",
+});
+
+// バリデーションルール
+const rules = {
+  email: { required, email },
+  password: { required, minLengthValue: minLength(8) },
+};
+
+// モデルにバリデーションを適応
+const v$ = useVuelidate(rules, state);
 
 // ログインしているユーザーデータ
 const currentUser = ref(null);
@@ -71,12 +103,18 @@ onMounted(() => {
   });
 });
 
+const errormessage = ref(null);
+
 // サインイン処理
-const signin = () => {
+const signin = async () => {
+  // バリデーションエラー時は処理を停止
+  const isFormCorrect = await v$.value.$validate();
+  if (!isFormCorrect) return;
+
   // メールアドレスとパスワードが入力されているかを確認
-  if (email.value == "" || password.value == "") return;
+  if (state.email == "" || state.password == "") return;
   const auth = getAuth();
-  signInWithEmailAndPassword(auth, email.value, password.value)
+  signInWithEmailAndPassword(auth, state.email, state.password)
     .then((userCredential) => {
       // 成功時処理
       const user = userCredential.user;
@@ -91,9 +129,13 @@ const signin = () => {
 };
 
 // サインアップ処理
-const createAccount = () => {
+const createAccount = async () => {
+  // バリデーションエラー時は処理を停止
+  const isFormCorrect = await v$.value.$validate();
+  if (!isFormCorrect) return;
+
   const auth = getAuth();
-  createUserWithEmailAndPassword(auth, email.value, password.value)
+  createUserWithEmailAndPassword(auth, state.email, state.password)
     .then((userCredential) => {
       // 成功時処理
       const user = userCredential.user;
