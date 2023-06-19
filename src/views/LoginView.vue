@@ -70,7 +70,13 @@ import {
 // Vuelidateパッケージ
 import { useVuelidate } from "@vuelidate/core";
 // Builtin
-import { email, required, minLength } from "@vuelidate/validators";
+import { email, required, minLength, helpers } from "@vuelidate/validators";
+// バリデーションメッセージ
+import {
+  requiredMessage,
+  emailMessage,
+  minLengthMessage,
+} from "../plugins/validatorMessage";
 
 //パスワードのブラインド切り替え用の値
 const show = ref(false);
@@ -91,8 +97,17 @@ const state = reactive({
 
 // バリデーションルール
 const rules = {
-  email: { required, email },
-  password: { required, minLengthValue: minLength(8) },
+  email: {
+    required: helpers.withMessage(requiredMessage("メールアドレス"), required),
+    email: helpers.withMessage(emailMessage, email),
+  },
+  password: {
+    required: helpers.withMessage(requiredMessage("パスワード"), required),
+    minLengthValue: helpers.withMessage(
+      minLengthMessage("パスワード", 8),
+      minLength(8)
+    ),
+  },
 };
 
 // モデルにバリデーションを適応
