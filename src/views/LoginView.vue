@@ -48,8 +48,19 @@
       </v-card>
     </div>
     <div v-else>
-      個人情報登録画面
-      <v-btn variant="tonal" color="primary" block @click="signout">
+      <ProfileComponent
+        :buttonName="constant.buttonName"
+        @submit="createtProfile"
+      />
+
+      <!-- 仮設置 -->
+      <v-btn
+        class="mt-5"
+        variant="tonal"
+        color="primary"
+        block
+        @click="signout"
+      >
         サインアウト
       </v-btn>
     </div>
@@ -69,6 +80,9 @@ import {
 
 // Vuelidateパッケージ
 import { useVuelidate } from "@vuelidate/core";
+
+import ProfileComponent from "../components/ProfileComponent.vue";
+
 // Builtin
 import { email, required, minLength, helpers } from "@vuelidate/validators";
 // バリデーションメッセージ
@@ -77,6 +91,11 @@ import {
   emailMessage,
   minLengthMessage,
 } from "../plugins/validatorMessage";
+
+// DB情報をインポート
+import { db } from "../firebase";
+//  DB登録処理に必要なメソッドをインポート
+import { doc, setDoc } from "firebase/firestore";
 
 //パスワードのブラインド切り替え用の値
 const show = ref(false);
@@ -87,6 +106,7 @@ const constant = {
   password: "パスワード",
   signin: "サインイン",
   sinup: "サインアップ",
+  buttonName: "登録",
 };
 
 // サインイン/サインアップデータ
@@ -194,5 +214,14 @@ const signout = () => {
     .catch((error) => {
       console.log(error);
     });
+};
+
+// PR情報の登録
+const createtProfile = async (value) => {
+  console.log(value);
+  const auth = getAuth();
+  await setDoc(doc(db, "profile", currentUser.value.email), {
+    ...value,
+  });
 };
 </script>
