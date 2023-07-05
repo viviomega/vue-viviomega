@@ -22,6 +22,12 @@ const routes = [
     name: "login",
     component: () => import("../views/LoginView.vue"),
   },
+  {
+    // プロフィール画面
+    path: "/profile",
+    name: "profile",
+    component: () => import("../views/ProfileView.vue"),
+  },
 ];
 
 const router = createRouter({
