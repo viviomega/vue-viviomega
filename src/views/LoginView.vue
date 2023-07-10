@@ -219,8 +219,7 @@ const signout = () => {
 // PR情報の登録
 const createtProfile = async (value) => {
   console.log(value);
-  const auth = getAuth();
-  await setDoc(doc(db, "profile", currentUser.value.email), {
+  await setDoc(doc(db, "profile", currentUser.value.uid), {
     ...value,
   });
 };
