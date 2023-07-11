@@ -24,7 +24,7 @@ const routes = [
   },
   {
     // プロフィール画面
-    path: "/profile",
+    path: "/profile/:id",
     name: "profile",
     component: () => import("../views/ProfileView.vue"),
   },
