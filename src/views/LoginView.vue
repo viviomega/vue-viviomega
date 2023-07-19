@@ -1,16 +1,17 @@
 <template>
   <v-container>
+    <v-alert
+      v-if="serverError.text"
+      type="error"
+      max-width="500"
+      class="mx-auto mb-4"
+      :title="serverError.title"
+      :text="serverError.text"
+    ></v-alert>
     <div v-if="currentUser == null">
       <v-card max-width="500" class="mx-auto">
         <v-card-actions>
           <v-row>
-            <v-col cols="12" v-if="serverError.text">
-              <v-alert
-                type="error"
-                :title="serverError.title"
-                :text="serverError.text"
-              ></v-alert>
-            </v-col>
             <v-col cols="12">
               <v-text-field
                 v-model="state.email"
@@ -93,9 +94,11 @@ import {
 } from "../plugins/validatorMessage";
 
 // DB情報をインポート
-import { db } from "../firebase";
+import { db, storage } from "../firebase";
 //  DB登録処理に必要なメソッドをインポート
 import { doc, setDoc } from "firebase/firestore";
+
+import { uploadBytes, ref as storageRef } from "firebase/storage";
 
 //パスワードのブラインド切り替え用の値
 const show = ref(false);
@@ -170,6 +173,7 @@ const signin = async () => {
       // 失敗時処理
       const errorCode = error.code;
       const errorMessage = error.message;
+      serverError.title = "認証エラー";
       console.log(errorCode, errorMessage);
       if (errorCode === "auth/user-not-found") {
         serverError.text = "登録されていないメールアドレストです";
@@ -218,7 +222,26 @@ const signout = () => {
 
 // PR情報の登録
 const createtProfile = async (value) => {
-  console.log(value);
+  const fileExtension = value.icon[0].name.substr(-3);
+  serverError.text = "";
+
+  // ファイル識別子確認
+  if (!(fileExtension === "jpg" || fileExtension === "png")) {
+    serverError.title = "添付ファイルエラー";
+    serverError.text = "画像ファイルを設定してください";
+    return;
+  }
+
+  // 画像をストレージに保存
+  const imageRef = storageRef(
+    storage,
+    `icon/${currentUser.value.uid}_icon.${fileExtension}`
+  );
+  await uploadBytes(imageRef, value.icon[0]).then((snapshot) => {
+    console.log("Uploaded a blob or file!");
+  });
+
+  delete value.icon;
   await setDoc(doc(db, "profile", currentUser.value.uid), {
     ...value,
   });

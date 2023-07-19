@@ -47,6 +47,13 @@
             @blur="v$.pr.$touch"
           ></v-textarea>
         </v-col>
+        <!-- アイコン画像を登録 -->
+        <v-col cols="12">
+          <v-file-input
+            v-model="state.icon"
+            :label="constant.icon"
+          ></v-file-input>
+        </v-col>
         <v-col cols="12">
           <v-btn
             variant="tonal"
@@ -78,6 +85,7 @@ const constant = {
   gender: "性別",
   genderList: ["男性", "女性"],
   pr: "自己PR",
+  icon: "アイコン画像",
 };
 
 // プロパティの初期化
@@ -90,6 +98,7 @@ const props = defineProps({
       birthday: "",
       gender: null,
       pr: "",
+      icon: null,
     }),
   },
   buttonName: {
@@ -107,6 +116,7 @@ const emit = defineEmits({
     birthday: "",
     gender: null,
     pr: "",
+    icon: null,
   },
 });
 
@@ -140,6 +150,7 @@ const v$ = useVuelidate(rules, state);
 // ボタンの処理
 const submit = async () => {
   // バリデーションエラー時は処理を停止
+
   const isFormCorrect = await v$.value.$validate();
   if (!isFormCorrect) return;
 
