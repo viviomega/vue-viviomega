@@ -4,6 +4,12 @@
       <v-card max-width="500" class="mx-auto">
         <v-card-actions>
           <v-row>
+            <v-col cols="12" class="text-center">
+              <v-avatar size="150">
+                <v-img :src="state.icon" alt="Icon" cover></v-img>
+              </v-avatar>
+            </v-col>
+            <v-divider></v-divider>
             <v-col cols="12">
               <div class="text-caption mb-2">
                 {{ constant.name }}
@@ -48,9 +54,11 @@
 <script setup>
 import { ref, reactive, onMounted } from "vue";
 import { useRoute } from "vue-router";
-import { db } from "../firebase";
+import { db, storage } from "../firebase";
 import { doc, getDoc } from "firebase/firestore";
 import { getAuth, onAuthStateChanged } from "firebase/auth";
+
+import { ref as storageRef, getDownloadURL } from "firebase/storage";
 
 import ProfileComponent from "../components/ProfileComponent.vue";
 
@@ -70,6 +78,7 @@ const state = reactive({
   birthday: "",
   gender: null,
   pr: "",
+  icon: "",
 });
 
 // ログインしているユーザーデータ
@@ -104,6 +113,14 @@ onMounted(async () => {
     console.log("No such document!", docSnap.exists());
     docFlg.value = docSnap.exists();
   }
+
+  // 画像URL参照
+  const spaceRef = storageRef(storage, docSnap.data().icon);
+  getDownloadURL(spaceRef)
+    .then((url) => {
+      state.icon = url;
+    })
+    .catch((err) => console.log(err));
 });
 
 // PR情報の編集
