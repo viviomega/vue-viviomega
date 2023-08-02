@@ -74,11 +74,24 @@
             :text="iconError.text"
           ></v-alert>
         </v-card-text>
+
+        <v-card-text class="text-center">
+          <v-avatar
+            v-if="state.icon.name"
+            size="150"
+            style="cursor: pointer"
+            @click="dialog = true"
+          >
+            <v-img :src="previewURL" alt="previIcon" cover></v-img>
+          </v-avatar>
+        </v-card-text>
+
         <v-card-text>
           <v-file-input
             v-model="state.icon.file"
             :label="constant.icon"
             accept=".jpg,.png"
+            @change="uploadFile"
           ></v-file-input>
         </v-card-text>
         <v-card-actions>
@@ -143,6 +156,8 @@ const iconError = reactive({
   title: "添付ファイルエラー",
   text: "",
 });
+// プレビューURL
+const previewURL = ref();
 
 onMounted(async () => {
   const auth = getAuth();
@@ -219,5 +234,11 @@ const addIcon = async () => {
   });
 
   dialog.value = false;
+};
+
+// アイコン画像のプレビュー
+const uploadFile = () => {
+  previewURL.value = URL.createObjectURL(state.icon.file[0]);
+  console.log(previewURL.value);
 };
 </script>
