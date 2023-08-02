@@ -94,11 +94,9 @@ import {
 } from "../plugins/validatorMessage";
 
 // DB情報をインポート
-import { db, storage } from "../firebase";
+import { db } from "../firebase";
 //  DB登録処理に必要なメソッドをインポート
 import { doc, setDoc } from "firebase/firestore";
-
-import { uploadBytes, ref as storageRef } from "firebase/storage";
 
 //パスワードのブラインド切り替え用の値
 const show = ref(false);
@@ -222,29 +220,10 @@ const signout = () => {
 
 // PR情報の登録
 const createtProfile = async (value) => {
-  const fileExtension = value.icon[0].name.substr(-3);
-  const imageName = `icon/${currentUser.value.uid}_icon.${fileExtension}`;
   serverError.text = "";
 
-  // ファイル識別子確認
-  if (!(fileExtension === "jpg" || fileExtension === "png")) {
-    serverError.title = "添付ファイルエラー";
-    serverError.text = "画像ファイルを設定してください";
-    return;
-  }
-
-  // 画像をストレージに保存
-  const imageRef = storageRef(storage, imageName);
-  await uploadBytes(imageRef, value.icon[0]).then((snapshot) => {
-    console.log("Uploaded a blob or file!");
-  });
-
-  delete value.icon;
-  const setData = value;
-  // 画像情報を登録情報に追加
-  setData.icon = imageName;
   await setDoc(doc(db, "profile", currentUser.value.uid), {
-    ...setData,
+    ...value,
   });
 };
 </script>
