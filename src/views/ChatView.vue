@@ -8,18 +8,9 @@
             <v-col cols="2" class="pb-0 d-flex justify-start">
               <v-avatar color="surface-variant"></v-avatar>
             </v-col>
-            <v-col
-              cols="10"
-              class="d-flex align-center pb-0"
-              style="
-                text-overflow: ellipsis;
-                white-space: nowrap;
-                overflow: hidden;
-              "
-              >{{
-                currentUser ? currentUser.substring(0, 20) + "..." : ""
-              }}</v-col
-            >
+            <v-col cols="10" class="d-flex align-center pb-0">{{
+              currentUser ? currentUser.substring(0, 20) + "..." : ""
+            }}</v-col>
             <v-col cols="2"></v-col>
             <v-col cols="10">
               <v-textarea
