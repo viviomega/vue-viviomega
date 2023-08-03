@@ -28,6 +28,12 @@ const routes = [
     name: "profile",
     component: () => import("../views/ProfileView.vue"),
   },
+  {
+    // チャット画面
+    path: "/chat",
+    name: "chat",
+    component: () => import("../views/ChatView.vue"),
+  },
 ];
 
 const router = createRouter({
