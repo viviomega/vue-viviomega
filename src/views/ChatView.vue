@@ -4,12 +4,21 @@
       <v-card class="my-2" width="500" variant="outlined" color="primary">
         <template v-slot:text>
           <v-row>
-            <v-col cols="2" class="pb-0">
-              <v-avatar color="surface-variant" class="mx-2"></v-avatar>
+            <v-col cols="2" class="pb-0 d-flex justify-start">
+              <v-avatar color="surface-variant"></v-avatar>
             </v-col>
-            <v-col cols="10" class="d-flex align-center pb-0">{{
-              currentUser
-            }}</v-col>
+            <v-col
+              cols="10"
+              class="d-flex align-center pb-0"
+              style="
+                text-overflow: ellipsis;
+                white-space: nowrap;
+                overflow: hidden;
+              "
+              >{{
+                currentUser ? currentUser.substring(0, 20) + "..." : ""
+              }}</v-col
+            >
             <v-col cols="2"></v-col>
             <v-col cols="10">
               <v-textarea
@@ -42,11 +51,11 @@
     >
       <template v-slot:text>
         <v-row>
-          <v-col cols="2" class="pb-0">
-            <v-avatar color="surface-variant" class="mx-2"></v-avatar>
+          <v-col cols="2" class="pb-0 justify-start">
+            <v-avatar color="surface-variant"></v-avatar>
           </v-col>
           <v-col cols="10" class="d-flex align-center pb-0">{{
-            item.username
+            item.username ? item.username.substring(0, 20) + "..." : ""
           }}</v-col>
           <v-col cols="2"></v-col>
           <v-col cols="10">{{ item.text }}</v-col>
