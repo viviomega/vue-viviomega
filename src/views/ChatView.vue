@@ -1,6 +1,7 @@
 <template>
   <v-container>
     <div class="d-flex justify-end">
+      <!-- メッセージ送信 -->
       <v-card class="my-2" width="500" variant="outlined" color="primary">
         <template v-slot:text>
           <v-row>
@@ -42,6 +43,7 @@
       </v-card>
     </div>
 
+    <!-- メッセージ一覧 -->
     <v-card
       class="my-2"
       max-width="500"
@@ -80,6 +82,7 @@ const constant = {
   send: "送信",
 };
 
+// チャットデータ
 const items = ref(null);
 
 // ログインしているユーザーデータ
@@ -94,6 +97,7 @@ onMounted(async () => {
     console.log(currentUser.value);
   });
 
+  // chatテーブルのDBを自動検知で更新を行う処理
   onValue(databaseRef(rldb, "chat"), (snapshot) => {
     console.log(snapshot.val());
     items.value = { ...snapshot.val() };
