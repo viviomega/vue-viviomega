@@ -6,12 +6,12 @@
           <v-row>
             <v-col cols="12" class="text-center">
               <v-avatar
-                v-if="state.icon.name"
+                v-if="state.icon"
                 size="150"
                 style="cursor: pointer"
                 @click="dialog = true"
               >
-                <v-img :src="state.icon.url" alt="Icon" cover></v-img>
+                <v-img :src="state.icon" alt="Icon" cover></v-img>
               </v-avatar>
               <v-avatar
                 v-else
@@ -77,7 +77,7 @@
 
         <v-card-text class="text-center">
           <v-avatar
-            v-if="state.icon.name"
+            v-if="iconFile"
             size="150"
             style="cursor: pointer"
             @click="dialog = true"
@@ -88,7 +88,7 @@
 
         <v-card-text>
           <v-file-input
-            v-model="state.icon.file"
+            v-model="iconFile"
             :label="constant.icon"
             accept=".jpg,.png"
             @change="uploadFile"
@@ -133,11 +133,7 @@ const state = reactive({
   birthday: "",
   gender: null,
   pr: "",
-  icon: {
-    name: null,
-    file: null,
-    url: null,
-  },
+  icon: null,
 });
 
 // ログインしているユーザーデータ
@@ -150,14 +146,17 @@ const { id } = route.params;
 
 // ダイアログフラグ
 const dialog = ref(false);
+
 // 画像指定エラーフラグ
 const iconError = reactive({
   flg: false,
   title: "添付ファイルエラー",
   text: "",
 });
+
 // プレビューURL
 const previewURL = ref();
+const iconFile = ref();
 
 onMounted(async () => {
   const auth = getAuth();
@@ -178,26 +177,13 @@ onMounted(async () => {
     state.birthday = docSnap.data().birthday;
     state.gender = docSnap.data().gender;
     state.pr = docSnap.data().pr;
-    state.icon.name = docSnap.data().icon;
+    state.icon = docSnap.data().icon;
   } else {
     // 失敗時の処理
     console.log("No such document!", docSnap.exists());
     docFlg.value = docSnap.exists();
   }
-
-  if (state.icon.name) getIconUrl();
 });
-
-// 画像URL参照
-const getIconUrl = () => {
-  console.log(state.icon.name);
-  const spaceRef = storageRef(storage, state.icon.name);
-  getDownloadURL(spaceRef)
-    .then((url) => {
-      state.icon.url = url;
-    })
-    .catch((err) => console.log(err));
-};
 
 // PR情報の編集
 const editProfile = async (value) => {
@@ -208,37 +194,39 @@ const editProfile = async (value) => {
 const addIcon = async () => {
   iconError.flg = false;
 
-  if (state.icon.file == null) {
+  if (iconFile.value[0] == null) {
     iconError.title = "添付ファイルエラー";
     iconError.text = "ファイルを設定してください";
     iconError.flg = true;
     return;
   }
 
-  const fileExtension = state.icon.file[0].name.substr(-3);
-  state.icon.name = `icon/${currentUser.value}_icon.${fileExtension}`;
+  const fileExtension = iconFile.value[0].name.substr(-3);
+  const iconName = `icon/${currentUser.value}_icon.${fileExtension}`;
 
   // 画像をストレージに保存
-  const imageRef = storageRef(storage, state.icon.name);
-  await uploadBytes(imageRef, state.icon.file[0]).then((snapshot) => {
+  const imageRef = storageRef(storage, iconName);
+
+  await uploadBytes(imageRef, iconFile.value[0]).then((snapshot) => {
     console.log("Uploaded a blob or file!");
   });
 
-  getIconUrl();
-
-  const washingtonRef = doc(db, "profile", currentUser.value);
-
-  // アイコン情報を更新
-  await updateDoc(washingtonRef, {
-    icon: state.icon.name,
-  });
+  getDownloadURL(imageRef)
+    .then(async (url) => {
+      // アイコン情報を更新
+      const washingtonRef = doc(db, "profile", currentUser.value);
+      await updateDoc(washingtonRef, {
+        icon: url,
+      });
+    })
+    .catch((err) => console.log(err));
 
   dialog.value = false;
 };
 
 // アイコン画像のプレビュー
 const uploadFile = () => {
-  previewURL.value = URL.createObjectURL(state.icon.file[0]);
+  previewURL.value = URL.createObjectURL(iconFile.value[0]);
   console.log(previewURL.value);
 };
 </script>
