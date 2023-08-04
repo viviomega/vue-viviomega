@@ -6,10 +6,14 @@
         <template v-slot:text>
           <v-row>
             <v-col cols="2" class="pb-0 d-flex justify-start">
-              <v-avatar color="surface-variant"></v-avatar>
+              <v-avatar color="primary">
+                <v-icon>mdi-account</v-icon>
+              </v-avatar>
             </v-col>
             <v-col cols="10" class="d-flex align-center pb-0">{{
-              currentUser ? currentUser.substring(0, 20) + "..." : ""
+              profileDate.name.length > 20
+                ? currentUser.substring(0, 20) + "..."
+                : profileDate.name
             }}</v-col>
             <v-col cols="2"></v-col>
             <v-col cols="10">
@@ -41,14 +45,19 @@
       variant="outlined"
       v-for="(item, index) in items"
       :key="index"
+      :color="item.uid == currentUser ? 'primary' : ''"
     >
       <template v-slot:text>
         <v-row>
           <v-col cols="2" class="pb-0 justify-start">
-            <v-avatar color="surface-variant"></v-avatar>
+            <v-avatar color="primary">
+              <v-icon>mdi-account</v-icon>
+            </v-avatar>
           </v-col>
           <v-col cols="10" class="d-flex align-center pb-0">{{
-            item.username ? item.username.substring(0, 20) + "..." : ""
+            item.username > 20
+              ? item.username.substring(0, 20) + "..."
+              : item.username
           }}</v-col>
           <v-col cols="2"></v-col>
           <v-col cols="10">{{ item.text }}</v-col>
@@ -65,6 +74,7 @@ import { ref, reactive, onMounted } from "vue";
 import { rldb } from "../firebase";
 import { ref as databaseRef, push, onValue } from "firebase/database";
 import { getAuth, onAuthStateChanged } from "firebase/auth";
+import profileGet from "../plugins/profile";
 
 const message = ref(null);
 
@@ -79,18 +89,32 @@ const items = ref(null);
 // ログインしているユーザーデータ
 const currentUser = ref(null);
 
-onMounted(async () => {
+const profileDate = reactive({
+  name: "",
+  birthday: "",
+  gender: null,
+  pr: "",
+  icon: null,
+});
+const iconImage = ref(null);
+
+onMounted(() => {
   // ログイン情報の取得
   const auth = getAuth();
-  onAuthStateChanged(auth, (user) => {
-    if (user != null) currentUser.value = user.uid;
-    else currentUser.value = null;
-    console.log(currentUser.value);
-  });
+  onAuthStateChanged(auth, async (user) => {
+    if (user != null) {
+      currentUser.value = user.uid;
+      const data = await profileGet(user.uid);
 
+      profileDate.name = data.name;
+      profileDate.birthday = data.birthday;
+      profileDate.gender = data.gender;
+      profileDate.pr = data.pr;
+      profileDate.icon = data.icon;
+    } else currentUser.value = null;
+  });
   // chatテーブルのDBを自動検知で更新を行う処理
   onValue(databaseRef(rldb, "chat"), (snapshot) => {
-    console.log(snapshot.val());
     items.value = { ...snapshot.val() };
   });
 });
@@ -99,7 +123,8 @@ onMounted(async () => {
 const writeUserData = async () => {
   const now = new Date();
   await push(databaseRef(rldb, "chat"), {
-    username: currentUser.value,
+    uid: currentUser.value,
+    username: profileDate.name,
     text: message.value,
     date: `${now.getFullYear()}/${
       now.getMonth() + 1
