@@ -7,7 +7,8 @@
           <v-row>
             <v-col cols="2" class="pb-0 d-flex justify-start">
               <v-avatar color="primary">
-                <v-icon>mdi-account</v-icon>
+                <v-icon v-if="!profileDate.icon">mdi-account</v-icon>
+                <v-img v-else :src="profileDate.icon" alt="Icon" cover></v-img>
               </v-avatar>
             </v-col>
             <v-col cols="10" class="d-flex align-center pb-0">{{
@@ -51,7 +52,8 @@
         <v-row>
           <v-col cols="2" class="pb-0 justify-start">
             <v-avatar color="primary">
-              <v-icon>mdi-account</v-icon>
+              <v-icon v-if="!item.icon">mdi-account</v-icon>
+              <v-img v-else :src="item.icon" alt="Icon" cover></v-img>
             </v-avatar>
           </v-col>
           <v-col cols="10" class="d-flex align-center pb-0">{{
@@ -125,6 +127,7 @@ const writeUserData = async () => {
   await push(databaseRef(rldb, "chat"), {
     uid: currentUser.value,
     username: profileDate.name,
+    icon: profileDate.icon,
     text: message.value,
     date: `${now.getFullYear()}/${
       now.getMonth() + 1
