@@ -41,7 +41,12 @@
                       ></v-text-field>
                     </v-col>
                     <v-col cols="12">
-                      <v-btn variant="outlined" block @click="signin">
+                      <v-btn
+                        variant="outlined"
+                        block
+                        @click="signin"
+                        :loading="loading"
+                      >
                         {{ constant.signin }}
                       </v-btn>
                     </v-col>
@@ -225,6 +230,8 @@ const signin = async () => {
   console.log(isFormCorrect);
   if (!isFormCorrect) return;
 
+  loading.value = true;
+
   // メールアドレスとパスワードが入力されているかを確認
   if (signinSt.email == "" || signinSt.password == "") return;
   const auth = getAuth();
@@ -233,6 +240,7 @@ const signin = async () => {
       // 成功時処理
       const user = userCredential.user;
       currentUser.value = user;
+      setTimeout(() => router.push("/"), 1500);
     })
     .catch((error) => {
       // 失敗時処理
@@ -243,6 +251,7 @@ const signin = async () => {
       } else if (errorCode === "auth/wrong-password") {
         serverError.value = "パスワードが違います";
       }
+      setTimeout(() => (loading.value = false), 1500);
     });
 };
 
@@ -277,6 +286,7 @@ const sinup = async () => {
       } else {
         serverError.value = errorMessage;
       }
+      setTimeout(() => (loading.value = false), 1500);
     });
 };
 
