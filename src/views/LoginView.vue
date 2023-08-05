@@ -16,22 +16,32 @@
                   <v-row>
                     <v-col cols="12">
                       <v-text-field
-                        v-model="state.email"
+                        v-model="signinSt.email"
                         :label="constant.email"
                         type="email"
                         variant="outlined"
+                        :error-messages="
+                          v$.email.$errors.map((e) => e.$message)
+                        "
+                        @input="v$.email.$touch"
+                        @blur="v$.email.$touch"
                       ></v-text-field>
                     </v-col>
                     <v-col cols="12">
                       <v-text-field
-                        v-model="state.password"
+                        v-model="signinSt.password"
                         :label="constant.password"
                         type="password"
                         variant="outlined"
+                        :error-messages="
+                          v$.password.$errors.map((e) => e.$message)
+                        "
+                        @input="v$.password.$touch"
+                        @blur="v$.password.$touch"
                       ></v-text-field>
                     </v-col>
                     <v-col cols="12">
-                      <v-btn variant="outlined" block>
+                      <v-btn variant="outlined" block @click="signin">
                         {{ constant.signin }}
                       </v-btn>
                     </v-col>
@@ -49,40 +59,40 @@
                   <v-row>
                     <v-col cols="12">
                       <v-text-field
-                        v-model="state.username"
+                        v-model="sinupSt.username"
                         :label="constant.username"
-                        :error-messages="
-                          v$.username.$errors.map((e) => e.$message)
-                        "
-                        @input="v$.username.$touch"
-                        @blur="v$.username.$touch"
                         variant="outlined"
+                        :error-messages="
+                          v2$.username.$errors.map((e) => e.$message)
+                        "
+                        @input="v2$.username.$touch"
+                        @blur="v2$.username.$touch"
                       ></v-text-field>
                     </v-col>
                     <v-col cols="12">
                       <v-text-field
-                        v-model="state.email"
+                        v-model="sinupSt.email"
                         :label="constant.email"
-                        :error-messages="
-                          v$.email.$errors.map((e) => e.$message)
-                        "
-                        @input="v$.email.$touch"
-                        @blur="v$.email.$touch"
                         type="email"
                         variant="outlined"
+                        :error-messages="
+                          v2$.email.$errors.map((e) => e.$message)
+                        "
+                        @input="v2$.email.$touch"
+                        @blur="v2$.email.$touch"
                       ></v-text-field>
                     </v-col>
                     <v-col cols="12">
                       <v-text-field
-                        v-model="state.password"
+                        v-model="sinupSt.password"
                         :label="constant.password"
-                        :error-messages="
-                          v$.password.$errors.map((e) => e.$message)
-                        "
-                        @input="v$.password.$touch"
-                        @blur="v$.password.$touch"
                         type="password"
                         variant="outlined"
+                        :error-messages="
+                          v2$.password.$errors.map((e) => e.$message)
+                        "
+                        @input="v2$.password.$touch"
+                        @blur="v2$.password.$touch"
                       ></v-text-field>
                     </v-col>
                     <v-col cols="12">
@@ -153,7 +163,13 @@ const tab = ref();
 const currentUser = ref(null);
 
 // Loginステータス
-const state = reactive({
+const signinSt = reactive({
+  email: "",
+  password: "",
+});
+
+// Loginステータス
+const sinupSt = reactive({
   username: "",
   email: "",
   password: "",
@@ -166,9 +182,22 @@ const loading = ref(false);
 const serverError = ref();
 
 const router = useRouter();
-const route = useRoute();
 
 const rules = {
+  email: {
+    required: helpers.withMessage(requiredMessage("Email"), required),
+    email: helpers.withMessage(emailMessage, email),
+  },
+  password: {
+    required: helpers.withMessage(requiredMessage("Password"), required),
+    minLengthValue: helpers.withMessage(
+      minLengthMessage("Password", 8),
+      minLength(8)
+    ),
+  },
+};
+
+const rules2 = {
   username: {
     required: helpers.withMessage(requiredMessage("UserName"), required),
   },
@@ -186,18 +215,20 @@ const rules = {
 };
 
 // モデルにバリデーションを適応
-const v$ = useVuelidate(rules, state);
+const v$ = useVuelidate(rules, signinSt);
+const v2$ = useVuelidate(rules2, sinupSt);
 
 // サインイン処理
 const signin = async () => {
   // バリデーションエラー時は処理を停止
   const isFormCorrect = await v$.value.$validate();
+  console.log(isFormCorrect);
   if (!isFormCorrect) return;
 
   // メールアドレスとパスワードが入力されているかを確認
-  if (state.email == "" || state.password == "") return;
+  if (signinSt.email == "" || signinSt.password == "") return;
   const auth = getAuth();
-  signInWithEmailAndPassword(auth, state.email, state.password)
+  signInWithEmailAndPassword(auth, signinSt.email, signinSt.password)
     .then((userCredential) => {
       // 成功時処理
       const user = userCredential.user;
@@ -218,7 +249,7 @@ const signin = async () => {
 // サインアップ処理
 const sinup = async () => {
   // バリデーションエラー時は処理を停止
-  const isFormCorrect = await v$.value.$validate();
+  const isFormCorrect = await v2$.value.$validate();
   if (!isFormCorrect) return;
 
   // ボタンのローディングフラグをtrue
@@ -226,12 +257,12 @@ const sinup = async () => {
 
   const auth = getAuth();
 
-  createUserWithEmailAndPassword(auth, state.email, state.password)
+  createUserWithEmailAndPassword(auth, sinupSt.email, sinupSt.password)
     .then((userCredential) => {
       // 成功時処理
       const user = userCredential.user;
       setDoc(doc(db, "profile", user.uid), {
-        username: state.username,
+        username: sinupSt.username,
       });
 
       setTimeout(() => router.push("/"), 1500);
