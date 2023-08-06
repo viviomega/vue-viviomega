@@ -2,7 +2,7 @@
   <v-container class="d-flex justify-center my-15">
     <v-row>
       <v-col cols="12" class="d-flex justify-center">
-        <v-card variant="outlined" width="500" height="500">
+        <v-card variant="outlined" max-width="500" height="500">
           <v-card-item>
             <v-tabs v-model="tab" align-tabs="start" class="mb-5">
               <v-tab :value="1">{{ constant.signin }}</v-tab>
