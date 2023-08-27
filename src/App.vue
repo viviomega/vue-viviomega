@@ -1,5 +1,10 @@
 <template>
   <v-app>
+    <v-app-bar :elevation="5" elevate-on-scroll>
+      <v-toolbar-title
+        ><v-img :src="logo" max-height="80"></v-img
+      ></v-toolbar-title>
+    </v-app-bar>
     <v-main>
       <router-view />
     </v-main>
@@ -8,9 +13,9 @@
 
 <script setup>
 import { firebaseApp } from "./firebase";
+import logo from "@/assets/GitHub.png";
 
 //サイトのタイトル
-const title = "びびおめがサイト";
 
 // HOMEアイコン
 const home = {
