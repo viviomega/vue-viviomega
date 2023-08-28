@@ -4,10 +4,6 @@ import { doc, getDoc } from "firebase/firestore";
 export default async (id) => {
   const state = {
     name: "",
-    birthday: "",
-    gender: null,
-    pr: "",
-    icon: null,
   };
 
   // DBからデータ取得
@@ -19,11 +15,7 @@ export default async (id) => {
     console.log("Document data:", docSnap.data());
 
     // プロフィールデータを設定
-    state.name = docSnap.data().name;
-    state.birthday = docSnap.data().birthday;
-    state.gender = docSnap.data().gender;
-    state.pr = docSnap.data().pr;
-    state.icon = docSnap.data().icon;
+    state.name = docSnap.data().username;
 
     return state;
   } else {
