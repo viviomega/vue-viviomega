@@ -1,6 +1,7 @@
 <template>
   <v-container class="d-flex justify-center my-15">
     <!-- サインイン -->
+    <AuthComponent @currentUser="getUser" />
     <v-row>
       <v-col cols="12" class="d-flex justify-center">
         <v-text-field
@@ -39,10 +40,11 @@
 </template>
 
 <script setup>
-import { ref, reactive, onMounted } from "vue";
-import { getAuth, onAuthStateChanged } from "firebase/auth";
+import { ref, onMounted } from "vue";
 // ルーティング
-import { useRoute, useRouter } from "vue-router";
+import { useRouter } from "vue-router";
+
+import AuthComponent from "../components/AuthComponent.vue";
 
 const insertBox = {
   title: "This is a title",
@@ -66,11 +68,10 @@ const tab = ref();
 
 // ライフサイクルmounted
 onMounted(() => {
-  const auth = getAuth();
-  onAuthStateChanged(auth, (user) => {
-    console.log(user);
-    if (user === null) router.push("/login");
-    else currentUser.value = user;
-  });
+  console.log(currentUser);
 });
+
+const getUser = (value) => {
+  currentUser.value = value;
+};
 </script>

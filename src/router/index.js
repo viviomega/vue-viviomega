@@ -34,6 +34,12 @@ const routes = [
     name: "chat",
     component: () => import("../views/ChatView.vue"),
   },
+  {
+    // チャット画面
+    path: "/chat/room/create",
+    name: "room",
+    component: () => import("../views/RoomCreate.vue"),
+  },
 ];
 
 const router = createRouter({
